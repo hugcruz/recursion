@@ -198,12 +198,40 @@
     )
   ))
 
+(defn take-while-pair [f a-seq]
+  (cond
+    (= (count a-seq) 1) a-seq
+    (f (first a-seq)(second a-seq))
+                        (cons (first a-seq) (take-while-pair f (rest a-seq)))
+    :else               (list (first a-seq))))
+
+
 (defn split-into-monotonics [a-seq]
-  [:-])
+  (if (empty? a-seq)
+    nil
+    (let [
+        function  (if(< (first a-seq) (second a-seq))
+                    <
+                    >)
+        monotonic (take-while-pair function a-seq)
+        remaining (drop (count monotonic) a-seq)
+         ]
+      (cons monotonic (split-into-monotonics remaining)))))
 
 (defn permutations [a-set]
-  [:-])
+  (if (empty? a-set)
+    '(())
+    (apply concat (map (fn [x] (map
+                                 #(cons (first x) %)
+                                 (permutations (rest x))))
+                       (rotations a-set)))))
 
 (defn powerset [a-set]
-  [:-])
-
+  (if(empty? a-set)
+    #{#{}}
+    (let [currentset (powerset (rest a-set))]
+      (clojure.set/union
+        currentset
+        (map #(conj % (first a-set))
+             currentset)
+))))
